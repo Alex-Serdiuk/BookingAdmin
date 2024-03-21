@@ -14,7 +14,7 @@ const New = ({ inputs, title }) => {
 
   const handleClick = e=>{
     e.preventDefault()
-    
+    // const data = new FormData
   }
 
   return (
