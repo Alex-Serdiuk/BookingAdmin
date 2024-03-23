@@ -1,7 +1,7 @@
 export const userInputs = [
   {
-    id: "username",
-    label: "Username",
+    id: "userName",
+    label: "UserName",
     type: "text",
     placeholder: "john_doe",
   },
@@ -12,8 +12,8 @@ export const userInputs = [
     placeholder: "john_doe@gmail.com",
   },
   {
-    id: "phone",
-    label: "Phone",
+    id: "phoneNumber",
+    label: "PhoneNumber",
     type: "text",
     placeholder: "+1 234 567 89",
   },
@@ -107,7 +107,7 @@ export const hotelInputs = [
     placeholder: "The best Hotel",
   },
   {
-    id: "desc",
+    id: "description",
     label: "Description",
     type: "text",
     placeholder: "description",
@@ -128,7 +128,7 @@ export const roomInputs = [
     placeholder: "2 bed room",
   },
   {
-    id: "desc",
+    id: "description",
     label: "Description",
     type: "text",
     placeholder: "King size bed, 1 bathroom",

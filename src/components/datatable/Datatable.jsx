@@ -66,8 +66,8 @@ const Datatable = ({columns}) => {
   return (
     <div className="datatable">
       <div className="datatableTitle">
-        Add New User
-        <Link to="/users/new" className="link">
+      {location.pathname.split("/")[1]}
+        <Link to={`/${location.pathname.split("/")[1]}/new`} className="link">
           Add New
         </Link>
       </div>
