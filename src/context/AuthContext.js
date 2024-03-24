@@ -1,3 +1,4 @@
+import axios from "axios";
 import { createContext, useEffect, useReducer } from "react";
 
 const INITIAL_STATE = {
@@ -44,6 +45,12 @@ export const AuthContextProvider = ({ children }) => {
 
   useEffect(() => {
     localStorage.setItem("user", JSON.stringify(state.user));
+    const user =JSON.parse(localStorage.getItem('user'));
+    if(user){
+      const token =user.token;
+      axios.defaults.headers.common = {'Authorization': `bearer ${token}`}
+    }
+    
   }, [state.user]);
 
   return (

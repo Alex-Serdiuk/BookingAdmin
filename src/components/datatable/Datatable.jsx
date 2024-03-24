@@ -49,7 +49,7 @@ const Datatable = ({columns}) => {
       renderCell: (params) => {
         return (
           <div className="cellAction">
-            <Link to="/users/test" style={{ textDecoration: "none" }}>
+            <Link to={`/${location.pathname.split("/")[1]}/${params.row.id}`} style={{ textDecoration: "none" }}>
               <div className="viewButton">View</div>
             </Link>
             <div

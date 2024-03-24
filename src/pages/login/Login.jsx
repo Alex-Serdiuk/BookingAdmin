@@ -24,7 +24,7 @@ const Login = () => {
         try {
           const res = await axios.post("/Account/Login", credentials);
           
-          if(res.data.isAdmin){
+          if(res.data.isAdmin === true){
             dispatch({ type: "LOGIN_SUCCESS", payload: res.data.details });
             navigate("/");
           }else{

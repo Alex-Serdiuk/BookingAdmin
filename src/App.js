@@ -48,7 +48,7 @@ function App() {
                 </ProtectedRoute>} />
               <Route path=":userId" element={
                 <ProtectedRoute>
-                  <Single />
+                  <Single inputs={userInputs}/>
                 </ProtectedRoute>} />
               <Route
                 path="new"
@@ -66,7 +66,7 @@ function App() {
                 </ProtectedRoute>} />
               <Route path=":productId" element={
                 <ProtectedRoute>
-                    <Single />
+                    <Single inputs={userInputs}/>
                 </ProtectedRoute>} />
               <Route
                 path="new"
