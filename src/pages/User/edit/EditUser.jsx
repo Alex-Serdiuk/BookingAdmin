@@ -1,16 +1,48 @@
-import "./new.scss";
-import Sidebar from "../../components/sidebar/Sidebar";
-import Navbar from "../../components/navbar/Navbar";
+import "./editUser.scss";
+import Sidebar from "../../../components/sidebar/Sidebar";
+import Navbar from "../../../components/navbar/Navbar";
 import DriveFolderUploadOutlinedIcon from "@mui/icons-material/DriveFolderUploadOutlined";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
+import { useLocation, useNavigate } from "react-router-dom";
+import useFetch from "../../../hooks/useFetch";
+import { AuthContext } from "../../../context/AuthContext";
 
-const New = ({ inputs, title }) => {
+const EditUser = ({ inputs, title }) => {
   const [file, setFile] = useState("");
-  const [info, setInfo] = useState({});
+ 
+  const location = useLocation();
+  const path = capitalizeWord(location.pathname.split("/")[1]);
+  const id = location.pathname.split("/")[3];
+ 
+  const { data, loading, error } = useFetch(`/${path}/${id}`);
+  const [info, setInfo] = useState(
+   data
+  );
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+  console.log(data);
+
+  function capitalizeWord(word) {
+    // Проверяем, является ли аргумент строкой
+    if (typeof word !== 'string') {
+      throw new Error('Input is not a string');
+    }
+  
+    // Обрезаем последнюю букву
+    const trimmedWord = word.slice(0, -1);
+  
+    // Преобразуем первую букву в заглавную, а остальные в строчные
+    const capitalizedWord = trimmedWord.charAt(0).toUpperCase() + trimmedWord.slice(1).toLowerCase();
+    return capitalizedWord;
+  }
+
+  useEffect(()=>{
+    
+  }, [])
 
   const handleChange = e =>{
-    setInfo(prev=>({...prev,[e.target.id]:e.target.value}))
+    setInfo({...info,[e.target.id]:e.target.value})
   };
 
   const handleClick = async e=>{
@@ -51,7 +83,7 @@ const New = ({ inputs, title }) => {
               src={
                 file
                   ? URL.createObjectURL(file)
-                  : "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg"
+                  : data.img ? data.img : "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg"
               }
               alt=""
             />
@@ -77,9 +109,11 @@ const New = ({ inputs, title }) => {
                     type={input.type}
                     placeholder={input.placeholder}
                     id={input.id}
+                    value={info[input.id]?.value}
                   />
                 </div>
               ))}
+              
               <button onClick={handleClick}>Send</button>
             </form>
           </div>
@@ -89,4 +123,4 @@ const New = ({ inputs, title }) => {
   );
 };
 
-export default New;
+export default EditUser;

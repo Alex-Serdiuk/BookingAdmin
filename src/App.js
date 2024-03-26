@@ -1,8 +1,8 @@
 import Home from "./pages/home/Home";
 import Login from "./pages/login/Login";
 import List from "./pages/list/List";
-import Single from "./pages/single/Single";
-import New from "./pages/new/New";
+import Single from "./pages/User/single/Single";
+import New from "./pages/User/new/New";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { hotelInputs, productInputs, userInputs } from "./formSource";
 import "./style/dark.scss";
@@ -10,8 +10,11 @@ import { useContext } from "react";
 import { DarkModeContext } from "./context/darkModeContext";
 import { AuthContext } from "./context/AuthContext";
 import { hotelColumns, roomColumns, userColumns } from "./datatablesource";
-import NewHotel from "./pages/newHotel/NewHotel";
-import NewRoom from "./pages/newRoom/NewRoom";
+import NewHotel from "./pages/Hotel/newHotel/NewHotel";
+import NewRoom from "./pages/Room/newRoom/NewRoom";
+import SingleHotel from "./pages/Hotel/singleHotel/SingleHotel";
+import SingleRoom from "./pages/Room/singleRoom/SingleRoom";
+import EditUser from "./pages/User/edit/EditUser";
 
 function App() {
   const { darkMode } = useContext(DarkModeContext);
@@ -50,6 +53,11 @@ function App() {
                 <ProtectedRoute>
                   <Single inputs={userInputs}/>
                 </ProtectedRoute>} />
+                <Route path="edit/:userId" element={
+                <ProtectedRoute>
+                <EditUser inputs={userInputs} title="Edit User"/>
+              </ProtectedRoute>} />
+                  
               <Route
                 path="new"
                 element={
@@ -66,7 +74,7 @@ function App() {
                 </ProtectedRoute>} />
               <Route path=":productId" element={
                 <ProtectedRoute>
-                    <Single inputs={userInputs}/>
+                    <SingleHotel/>
                 </ProtectedRoute>} />
               <Route
                 path="new"
@@ -84,7 +92,7 @@ function App() {
                 </ProtectedRoute>} />
               <Route path=":productId" element={
                 <ProtectedRoute>
-                    <Single />
+                    <SingleRoom />
                 </ProtectedRoute>} />
               <Route
                 path="new"

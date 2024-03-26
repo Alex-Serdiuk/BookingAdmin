@@ -52,6 +52,9 @@ const Datatable = ({columns}) => {
             <Link to={`/${location.pathname.split("/")[1]}/${params.row.id}`} style={{ textDecoration: "none" }}>
               <div className="viewButton">View</div>
             </Link>
+            <Link to={`/${location.pathname.split("/")[1]}/edit/${params.row.id}`} style={{ textDecoration: "none" }}>
+              <div className="editButton">Edit</div>
+            </Link>
             <div
               className="deleteButton"
               onClick={() => handleDelete(params.row.id)}
