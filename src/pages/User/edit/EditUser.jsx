@@ -17,11 +17,12 @@ const EditUser = ({ inputs, title }) => {
  
   const { data, loading, error } = useFetch(`/${path}/${id}`);
   const [info, setInfo] = useState(
-   data
+   {}
   );
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
-  console.log(data);
+  // console.log(data);
+  console.log(info)
 
   function capitalizeWord(word) {
     // Проверяем, является ли аргумент строкой
@@ -38,11 +39,26 @@ const EditUser = ({ inputs, title }) => {
   }
 
   useEffect(()=>{
-    
-  }, [])
+    if (!loading && !error && data) {
+      setInfo(data); // Оновлюємо стан даними, якщо дані були успішно завантажені з сервера
+    }
+  }, [data, loading, error]);
 
   const handleChange = e =>{
-    setInfo({...info,[e.target.id]:e.target.value})
+    const { name, value } = e.target;
+    setInfo(prevData => ({
+      ...prevData,
+      [name]: value
+    }))
+  };
+
+  const deleteImage = async (publicId) => {
+    try {
+      await axios.delete(`https://api.cloudinary.com/v1_1/alex-s/image/upload/${publicId}`);
+      console.log("Изображение успешно удалено");
+    } catch (error) {
+      console.error("Ошибка при удалении изображения:", error);
+    }
   };
 
   const handleClick = async e=>{
@@ -107,9 +123,9 @@ const EditUser = ({ inputs, title }) => {
                   <label>{input.label}</label>
                   <input onChange={handleChange}
                     type={input.type}
-                    placeholder={input.placeholder}
+                    // placeholder={input.placeholder}
                     id={input.id}
-                    value={info[input.id]?.value}
+                    value={info[input.id]}
                   />
                 </div>
               ))}
