@@ -15,6 +15,20 @@ const New = ({ inputs, title }) => {
 
   const handleClick = async e=>{
     e.preventDefault()
+    if (!file) {
+      // Якщо файл не вибрано, пропустити post-запит на Cloudinary
+      const newUser = {
+        ...info,
+        img: '', // Залишити img порожнім
+      };
+  
+      try {
+        await axios.post("/Account/Register", newUser);
+      } catch (err) {
+        console.log(err);
+      }
+      return;
+    }
     const data = new FormData()
     data.append("file",file)
     data.append("upload_preset","upload")

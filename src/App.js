@@ -15,6 +15,7 @@ import NewRoom from "./pages/Room/newRoom/NewRoom";
 import SingleHotel from "./pages/Hotel/singleHotel/SingleHotel";
 import SingleRoom from "./pages/Room/singleRoom/SingleRoom";
 import EditUser from "./pages/User/edit/EditUser";
+import EditHotel from "./pages/Hotel/edit/EditHotel";
 
 function App() {
   const { darkMode } = useContext(DarkModeContext);
@@ -72,10 +73,14 @@ function App() {
                 <ProtectedRoute>
                   <List columns={hotelColumns}/>
                 </ProtectedRoute>} />
-              <Route path=":productId" element={
+              <Route path=":hotelId" element={
                 <ProtectedRoute>
                     <SingleHotel/>
                 </ProtectedRoute>} />
+                <Route path="edit/:hotelId" element={
+                <ProtectedRoute>
+                <EditHotel inputs={hotelInputs} title="Edit Hotel"/>
+              </ProtectedRoute>} />
               <Route
                 path="new"
                 element={
