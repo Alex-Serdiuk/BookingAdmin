@@ -11,10 +11,8 @@ import { AuthContext } from "../../../context/AuthContext";
 import { sha1 } from "crypto-hash";
 import cloudinaryConfig from "../../../cloudinary-config";
 
-
 const EditUser = ({ inputs, title }) => {
   const [file, setFile] = useState("");
-  // const cloudinaryConfig = require('./cloudinary-config');
   const location = useLocation();
   const path = capitalizeWord(location.pathname.split("/")[1]);
   const id = location.pathname.split("/")[3];
@@ -54,27 +52,16 @@ const EditUser = ({ inputs, title }) => {
     setInfo(prev=>({...prev,[e.target.id]:e.target.value}))
   };
 
-  // const generateSHA1 = (data) => {
-  //   const hash = SHA1(data).toString();
-  //   return hash;
-  // };
-
   const generateSignature = (publicId, apiSecret) => {
     const timestamp = new Date().getTime();
     return `public_id=${publicId}&timestamp=${timestamp}${apiSecret}`;
   };
 
   const handleDelete = async ( publicId ) => {
-    // const cloudName = 'alex-s';
-    // const apiKey = '638892671555159';
-    // const apiSecret = 't-1ZVunVJE0HaWLQwVQUNLPVrqE';
-    
-    // const timestamp = new Date().getTime();
-    const timestamp = Date.now();
-    // const signature = generateSHA1(generateSignature(publicId, apiSecret));
+    const timestamp = Date.now(); 
     const signature = await sha1(
       `public_id=${publicId}&timestamp=${timestamp}${apiSecret}`
-  );
+    );
     const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/destroy`;
     // Видаляємо заголовок авторизації перед виконанням запиту на Cloudinary
     delete axios.defaults.headers.common['Authorization'];
@@ -234,7 +221,7 @@ const EditUser = ({ inputs, title }) => {
                   <label>{input.label}</label>
                   <input onChange={handleChange}
                     type={input.type}
-                    // placeholder={input.placeholder}
+                    placeholder={input.placeholder}
                     id={input.id}
                     value={info[input.id]}
                   />
@@ -245,6 +232,7 @@ const EditUser = ({ inputs, title }) => {
             </form>
           </div>
         </div>
+        
       </div>
     </div>
   );

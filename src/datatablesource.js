@@ -84,6 +84,44 @@ export const roomColumns = [
   },
 ];
 
+export const roomNumberColumns = [
+  { field: "id", headerName: "ID", width: 200 },
+  {
+    field: "number",
+    headerName: "Number",
+    width: 230,
+  }
+];
+
+export const hotelImageColumns = [
+  { field: "id", headerName: "ID", width: 70 },
+  {
+    field: "img",
+    headerName: "Image",
+    width: 100,
+    renderCell: (params) => {
+      return (
+        <div className="cellWithImg">
+          <a href={params.row.url || "https://i.ibb.co/MBtjqXQ/no-avatar.gif"}>
+            <img className="cellImg" src={params.row.url || "https://i.ibb.co/MBtjqXQ/no-avatar.gif"} target="_blank" rel="noopener noreferrer" alt="avatar" />
+          </a> 
+        </div>
+      );
+    },
+  },
+  {
+    field: "url",
+    headerName: "Url",
+    width: 630
+  },
+
+  // {
+  //   field: "hotelId",
+  //   headerName: "hotelId",
+  //   width: 100,
+  // }
+];
+
 //temporary data
 export const userRows = [
   {

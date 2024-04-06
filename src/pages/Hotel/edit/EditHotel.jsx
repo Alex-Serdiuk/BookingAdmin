@@ -9,6 +9,11 @@ import useFetch from "../../../hooks/useFetch";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/AuthContext";
+import Datatable from "../../../components/datatable/Datatable";
+import { roomColumns } from "../../../datatablesource";
+import DatatableRooms from "../datatableRooms/DatatableRooms";
+import DatatableImages from "../datatableImages/DatatableImages.jsx";
+import { hotelImageColumns } from "../../../datatablesource";
 
 const EditHotel = () => {
   const [files, setFiles] = useState("");
@@ -40,7 +45,7 @@ const EditHotel = () => {
     return capitalizedWord;
   }
 
-    console.log(hotelData);
+    // console.log(hotelData);
 
     useEffect(()=>{
       if (!hotelLoading && !hotelError && hotelData) {
@@ -92,7 +97,7 @@ const EditHotel = () => {
   const handleClick = async e =>{
     e.preventDefault()
     try{
-      let list={};
+      let list=[];
       if(!files){
         const Hotel ={
           ...info,
@@ -100,6 +105,7 @@ const EditHotel = () => {
           photos:list
         };
         await axios.put(`/Hotel/${id}`, Hotel);
+        return;
       }
       // const list = await Promise.all(
       //   Object.values(files).map(async (file)=>{
@@ -207,6 +213,8 @@ const EditHotel = () => {
             </form>
           </div>
         </div>
+        <DatatableRooms columns={roomColumns}/>
+        <DatatableImages columns={hotelImageColumns}/>
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import List from "./pages/list/List";
 import Single from "./pages/User/single/Single";
 import New from "./pages/User/new/New";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { hotelInputs, productInputs, userInputs } from "./formSource";
+import { hotelInputs, productInputs, roomInputs, userInputs } from "./formSource";
 import "./style/dark.scss";
 import { useContext } from "react";
 import { DarkModeContext } from "./context/darkModeContext";
@@ -16,6 +16,7 @@ import SingleHotel from "./pages/Hotel/singleHotel/SingleHotel";
 import SingleRoom from "./pages/Room/singleRoom/SingleRoom";
 import EditUser from "./pages/User/edit/EditUser";
 import EditHotel from "./pages/Hotel/edit/EditHotel";
+import EditRoom from "./pages/Room/EditRoom/EditRoom";
 
 function App() {
   const { darkMode } = useContext(DarkModeContext);
@@ -95,10 +96,14 @@ function App() {
                 <ProtectedRoute>
                   <List columns={roomColumns}/>
                 </ProtectedRoute>} />
-              <Route path=":productId" element={
+              <Route path=":roomId" element={
                 <ProtectedRoute>
                     <SingleRoom />
                 </ProtectedRoute>} />
+                <Route path="edit/:roomId" element={
+                <ProtectedRoute>
+                <EditRoom inputs={roomInputs} title="Edit Room"/>
+              </ProtectedRoute>} />
               <Route
                 path="new"
                 element={

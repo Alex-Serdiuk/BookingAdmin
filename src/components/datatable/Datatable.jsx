@@ -5,6 +5,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import useFetch from "../../hooks/useFetch";
 import axios from "axios";
+import { sha1 } from "crypto-hash";
 
 const Datatable = ({columns}) => {
   const location = useLocation();
@@ -33,7 +34,32 @@ const Datatable = ({columns}) => {
 
   const handleDelete = async (id) => {
     try{
-      
+      // if(path === "User"){ // TODO винести в окремий файл видалення та можливо завантаження в хмару щоб прибрати дублювання коду
+      //   // const timestamp = Date.now(); 
+      //   // const signature = await sha1(
+      //   // `public_id=${publicId}&timestamp=${timestamp}${apiSecret}`
+      //   // );
+      //   // const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/destroy`;
+      //   // // Видаляємо заголовок авторизації перед виконанням запиту на Cloudinary
+      //   // delete axios.defaults.headers.common['Authorization'];
+      //   // axios
+      //   //   .post(url, {
+      //   //     public_id: publicId,
+      //   //     timestamp: timestamp,
+      //   //     api_key: apiKey,
+      //   //     signature: signature
+      //   //   })
+      //   //   .then((response) => {
+      //   //     console.log('Изображение удалено из Cloudinary:', response);
+      //   //   })
+          
+      //   //   .catch((error) => {
+      //   //     console.error('Не удалось удалить изображение:', error);
+      //   //   }).finally(() =>{
+      //   //     const token =user.token;
+      //   //     axios.defaults.headers.common = {'Authorization': `bearer ${token}`};
+      //   //   });
+      // }
       await axios.delete(`/${path}/${id}`);
       setList(list => list.filter((item) => item.id !== id));
     }catch(err){
