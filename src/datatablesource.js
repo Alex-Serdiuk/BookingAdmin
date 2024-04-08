@@ -93,6 +93,15 @@ export const roomNumberColumns = [
   }
 ];
 
+export const unavailableDateColumns = [
+  { field: "id", headerName: "ID", width: 200 },
+  {
+    field: "date",
+    headerName: "Number",
+    width: 230,
+  }
+];
+
 export const hotelImageColumns = [
   { field: "id", headerName: "ID", width: 70 },
   {

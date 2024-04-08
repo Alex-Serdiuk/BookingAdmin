@@ -1,18 +1,19 @@
-import "./editRoom.scss";
-import Sidebar from "../../../components/sidebar/Sidebar";
-import Navbar from "../../../components/navbar/Navbar";
+import "./editRoomnumber.scss";
+import Sidebar from "../../../../components/sidebar/Sidebar";
+import Navbar from "../../../../components/navbar/Navbar";
 import DriveFolderUploadOutlinedIcon from "@mui/icons-material/DriveFolderUploadOutlined";
 import { useContext, useEffect, useState } from "react";
-import { roomInputs } from "../../../formSource";
-import useFetch from "../../../hooks/useFetch";
+import useFetch from "../../../../hooks/useFetch";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
-import { AuthContext } from "../../../context/AuthContext";
-import DatatableRoomNumbers from "../datatableRoomNumbers/DatatableRoomNumbers";
-import { roomNumberColumns } from "../../../datatablesource";
+import { AuthContext } from "../../../../context/AuthContext";
+// import DatatableRoomNumbers from "../datatableUnavailableDates/DatatableUnavailableDates";
+import { roomNumberColumns, unavailableDateColumns } from "../../../../datatablesource";
+import DatatableUnavailableDates from "../datatableUnavailableDates/DatatableUnavailableDates";
+import { roomNumberInputs } from "../../../../formSource";
 
 
-const EditRoom = () => {
+const EditRoomNumber = () => {
   const [info, setInfo] = useState({});
   const [hotelId, setHotelId] = useState(undefined);
   const [rooms, setRooms] = useState([]);
@@ -77,7 +78,7 @@ const EditRoom = () => {
         <div className="bottom">
           <div className="right">
             <form>
-              {roomInputs.map((input) => (
+              {roomNumberInputs.map((input) => (
                 <div className="formInput" key={input.id}>
                   <label>{input.label}</label>
                   <input 
@@ -89,11 +90,11 @@ const EditRoom = () => {
                   />
                 </div>
               ))}
-              <div className="formInput">
+              {/* <div className="formInput">
                   <label>Add New RoomNumbers</label>
                   <textarea onChange={e=>setRooms(e.target.value)}
                    placeholder="give comma between room numbers"/>
-                </div>
+                </div> */}
               {/* <div className="formInput">
                   <label>Choose a hotel</label>
                   <select 
@@ -112,10 +113,10 @@ const EditRoom = () => {
             </form>
           </div>
         </div>
-        <DatatableRoomNumbers columns={roomNumberColumns}/>
+        <DatatableUnavailableDates columns={unavailableDateColumns}/>
       </div>
     </div>
   );
 };
 
-export default EditRoom;
+export default EditRoomNumber;

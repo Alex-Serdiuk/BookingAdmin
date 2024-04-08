@@ -145,4 +145,14 @@ export const roomInputs = [
     type: "number",
     placeholder: "2",
   },
+ 
+   
+];
+export const roomNumberInputs = [
+  {
+    id: "number",
+    label: "Number",
+    type: "number",
+    placeholder: "101",
+  }
 ];

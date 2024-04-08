@@ -51,10 +51,10 @@ const DatatableRoomNumbers = ({columns}) => {
       renderCell: (params) => {
         return (
           <div className="cellAction">
-            <Link to={`/rooms/${params.row.id}`} style={{ textDecoration: "none" }}>
+            <Link to={`/roomNumbers/${params.row.id}`} style={{ textDecoration: "none" }}>
               <div className="viewButton">View</div>
             </Link>
-            <Link to={`/rooms/edit/${params.row.id}`} style={{ textDecoration: "none" }}>
+            <Link to={`/roomNumbers/edit/${params.row.id}`} style={{ textDecoration: "none" }}>
               <div className="editButton">Edit</div>
             </Link>
             <div
@@ -71,7 +71,7 @@ const DatatableRoomNumbers = ({columns}) => {
   return (
     <div className="datatable">
       <div className="datatableTitle">
-      Rooms
+      RoomNumbers
         <Link to={`/rooms/new`} className="link">
           Add New
         </Link>
