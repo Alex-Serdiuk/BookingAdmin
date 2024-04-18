@@ -17,11 +17,7 @@ export const userInputs = [
     type: "text",
     placeholder: "+1 234 567 89",
   },
-  {
-    id: "password",
-    label: "Password",
-    type: "password",
-  },
+  
   {
     id: "country",
     label: "Country",
@@ -33,6 +29,16 @@ export const userInputs = [
     label: "City",
     type: "text",
     placeholder: "USA",
+  },
+  {
+    id: "password",
+    label: "OldPassword",
+    type: "password",
+  },
+  {
+    id: "newPassword",
+    label: "NewPassword",
+    type: "password",
   },
 ];
 
