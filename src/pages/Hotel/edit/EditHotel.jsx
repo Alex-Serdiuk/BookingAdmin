@@ -97,7 +97,7 @@ const EditHotel = () => {
   const handleClick = async e =>{
     e.preventDefault()
     try{
-      let list=[];
+      let list=[]; 
       if(!files){
         const Hotel ={
           ...info,
@@ -131,7 +131,7 @@ const EditHotel = () => {
 
       await axios.put(`/Hotel/${id}`, Hotel);
     }catch(err){
-
+      console.log(err)
     }
   }
 

@@ -9,10 +9,12 @@ import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/AuthContext";
 import DatatableRoomNumbers from "../datatableRoomNumbers/DatatableRoomNumbers";
-import { roomNumberColumns } from "../../../datatablesource";
+import { hotelImageColumns, roomNumberColumns } from "../../../datatablesource";
+import DatatableRoomImages from "../datatableImages/DatatableRoomImages";
 
 
 const EditRoom = () => {
+  const [files, setFiles] = useState("");
   const [info, setInfo] = useState({});
   const [hotelId, setHotelId] = useState(undefined);
   const [rooms, setRooms] = useState([]);
@@ -49,20 +51,71 @@ const EditRoom = () => {
     setInfo((prev) => ({...prev, [e.target.id]: e.target.value}))
   };
 
+  const uploadImages = async (files) => {
+    try{
+      // Видаляємо заголовок авторизації перед виконанням запиту на Cloudinary
+      delete axios.defaults.headers.common['Authorization'];
+      const list = await Promise.all(
+        Object.values(files).map(async (file)=>{
+          const data = new FormData();
+          data.append("file",file);
+          data.append("upload_preset","upload");
+          const uploadRes = await axios.post(
+            "https://api.cloudinary.com/v1_1/alex-s/image/upload",
+            data
+          );
+    
+          const {url} = uploadRes.data;
+          return url;
+        })
+      );
+
+      return list;
+    }catch (error){
+      console.error("Ошибка при загрузке изображения:", error);
+      throw error;
+    } finally {
+      const token = user.token;
+      axios.defaults.headers.common = {'Authorization': `bearer ${token}`};
+    }
+  }
+
   const handleClick = async (e) => {
       e.preventDefault();
       
       try{
         let roomNumbers = [];
-        if(rooms){
-          // roomNumbers = rooms.split(",").map((room) => ({ number: room }));
-          roomNumbers = rooms.includes(",")
-            ? rooms.split(",").map((room) => ({ number: room }))
-            : [{ number: rooms }];
+        let list=[];
+        // Перевірка, чи є rooms рядком і чи не є він порожнім
+    if (rooms && typeof rooms === 'string' && rooms.trim() !== "") {
+      roomNumbers = rooms.split(",").map(room => {
+        const parsedNumber = parseInt(room.trim(), 10);
+        if (isNaN(parsedNumber)) {
+          throw new Error(`Invalid room number: ${room}`);
         }
-          await axios.put(`/Room/updateRoom/${id}`, {...info, roomNumbers})
+        return { number: parsedNumber };
+      });
+    }
+        if(!files){
+          const Room ={
+            ...info,
+            roomNumbers,
+            photos:list
+          };
+          await axios.put(`/Room/updateRoom/${id}`, Room);
+          return;
+        }
+        list = await uploadImages(files);
+
+        const Room ={
+          ...info,
+          roomNumbers,
+          photos:list
+        };
+  
+          await axios.put(`/Room/updateRoom/${id}`, Room);
       }catch(err){
-        console.log(err)
+        console.log(err);
       }
   };
 
@@ -75,8 +128,32 @@ const EditRoom = () => {
           <h1>Edit Room</h1>
         </div>
         <div className="bottom">
+        <div className="left">
+            <img
+              src={
+                files
+                  ? URL.createObjectURL(files[0])
+                  : (roomData.roomImages && roomData.roomImages.length > 0 ? roomData.roomImages[0]?.url : "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg")
+                  // : "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg"
+              }
+              alt=""
+            />
+          </div>
           <div className="right">
             <form>
+            <div className="formInput">
+                <label htmlFor="file">
+                  Add New Images: <DriveFolderUploadOutlinedIcon className="icon" />
+                </label>
+                <input
+                  type="file"
+                  id="file"
+                  multiple
+                  onChange={(e) => setFiles(e.target.files)}
+                  style={{ display: "none" }}
+                />
+              </div>
+
               {roomInputs.map((input) => (
                 <div className="formInput" key={input.id}>
                   <label>{input.label}</label>
@@ -113,6 +190,7 @@ const EditRoom = () => {
           </div>
         </div>
         <DatatableRoomNumbers columns={roomNumberColumns}/>
+        <DatatableRoomImages columns={hotelImageColumns}/>
       </div>
     </div>
   );
