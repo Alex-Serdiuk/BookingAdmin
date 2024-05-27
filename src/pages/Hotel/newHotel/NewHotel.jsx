@@ -2,15 +2,17 @@ import "./newHotel.scss";
 import Sidebar from "../../../components/sidebar/Sidebar";
 import Navbar from "../../../components/navbar/Navbar";
 import DriveFolderUploadOutlinedIcon from "@mui/icons-material/DriveFolderUploadOutlined";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { hotelInputs } from "../../../formSource";
 import useFetch from "../../../hooks/useFetch";
 import axios from "axios";
+import { AuthContext } from "../../../context/AuthContext";
 
 const NewHotel = () => {
   const [files, setFiles] = useState("");
   const [info, setInfo] = useState({});
   const [rooms, setRooms] = useState([]);
+  const { user } = useContext(AuthContext);
 
   const { data, loading, error } = useFetch("/Room");
 
@@ -29,6 +31,8 @@ const NewHotel = () => {
   const handleClick = async e =>{
     e.preventDefault()
     try{
+      // Видаляємо заголовок авторизації перед виконанням запиту на Cloudinary
+      delete axios.defaults.headers.common['Authorization'];
       const list = await Promise.all(
         Object.values(files).map(async (file)=>{
           const data = new FormData();
@@ -44,15 +48,13 @@ const NewHotel = () => {
         })
       );
 
-      const newHotel ={
-        ...info,
-        rooms,
-        photos:list
-      };
-
-      await axios.post("/Hotel", newHotel);
-    }catch(err){
-
+      return list;
+    }catch (error){
+      console.error("Ошибка при загрузке изображения:", error);
+      throw error;
+    } finally {
+      const token = user.token;
+      axios.defaults.headers.common = {'Authorization': `bearer ${token}`};
     }
   }
 
