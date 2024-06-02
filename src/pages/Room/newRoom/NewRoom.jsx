@@ -2,10 +2,11 @@ import "./newRoom.scss";
 import Sidebar from "../../../components/sidebar/Sidebar";
 import Navbar from "../../../components/navbar/Navbar";
 import DriveFolderUploadOutlinedIcon from "@mui/icons-material/DriveFolderUploadOutlined";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { roomInputs } from "../../../formSource";
 import useFetch from "../../../hooks/useFetch";
 import axios from "axios";
+import { AuthContext } from "../../../context/AuthContext";
 
 
 const NewRoom = () => {
@@ -13,6 +14,7 @@ const NewRoom = () => {
   const [info, setInfo] = useState({});
   const [hotelId, setHotelId] = useState(undefined);
   const [rooms, setRooms] = useState([]);
+  const { user } = useContext(AuthContext);
 
   const { data, loading, error } = useFetch("/Hotel");
 
@@ -20,28 +22,71 @@ const NewRoom = () => {
     setInfo((prev) => ({...prev, [e.target.id]: e.target.value}))
   };
 
+  const uploadImages = async (files) => {
+    try{
+      // Видаляємо заголовок авторизації перед виконанням запиту на Cloudinary
+      delete axios.defaults.headers.common['Authorization'];
+      const list = await Promise.all(
+        Object.values(files).map(async (file)=>{
+          const data = new FormData();
+          data.append("file",file);
+          data.append("upload_preset","upload");
+          const uploadRes = await axios.post(
+            "https://api.cloudinary.com/v1_1/alex-s/image/upload",
+            data
+          );
+    
+          const {url} = uploadRes.data;
+          return url;
+        })
+      );
+
+      return list;
+    }catch (error){
+      console.error("Ошибка при загрузке изображения:", error);
+      throw error;
+    } finally {
+      const token = user.token;
+      axios.defaults.headers.common = {'Authorization': `bearer ${token}`};
+    }
+  }
+
   const handleClick = async (e) => {
       e.preventDefault()
-      
+       
       try{
-          const list = await Promise.all(
-            Object.values(files).map(async (file)=>{
-              const data = new FormData();
-              data.append("file",file);
-              data.append("upload_preset","upload");
-              const uploadRes = await axios.post(
-                "https://api.cloudinary.com/v1_1/alex-s/image/upload",
-                data
-              );
-        
-              const {url} = uploadRes.data;
-              return url;
-            })
-          );
-          const roomNumbers = rooms.split(",").map((room) => ({ number: room}));
-          await axios.post(`/Room/createRoom/${hotelId}`, {...info, roomNumbers, photos:list})
+        let roomNumbers = [];
+        let list=[];
+        // Перевірка, чи є rooms рядком і чи не є він порожнім
+    if (rooms && typeof rooms === 'string' && rooms.trim() !== "") {
+      roomNumbers = rooms.split(",").map(room => {
+        const parsedNumber = parseInt(room.trim(), 10);
+        if (isNaN(parsedNumber)) {
+          throw new Error(`Invalid room number: ${room}`);
+        }
+        return { number: parsedNumber };
+      });
+    }
+        if(!files){
+          const Room ={
+            ...info,
+            roomNumbers,
+            photos:list
+          };
+          await axios.post(`/Room/createRoom/${hotelId}`, Room);
+          return;
+        }
+        list = await uploadImages(files);
+
+        const Room ={
+          ...info,
+          roomNumbers,
+          photos:list
+        };
+  
+        await axios.post(`/Room/createRoom/${hotelId}`, Room);
       }catch(err){
-        console.log(err)
+        console.log(err);
       }
   };
 

@@ -107,20 +107,7 @@ const EditHotel = () => {
         await axios.put(`/Hotel/${id}`, Hotel);
         return;
       }
-      // const list = await Promise.all(
-      //   Object.values(files).map(async (file)=>{
-      //     const data = new FormData();
-      //     data.append("file",file);
-      //     data.append("upload_preset","upload");
-      //     const uploadRes = await axios.post(
-      //       "https://api.cloudinary.com/v1_1/alex-s/image/upload",
-      //       data
-      //     );
-    
-      //     const {url} = uploadRes.data;
-      //     return url;
-      //   })
-      // );
+      
       list = await uploadImages(files);
 
       const Hotel ={

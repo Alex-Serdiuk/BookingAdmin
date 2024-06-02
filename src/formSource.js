@@ -118,12 +118,12 @@ export const hotelInputs = [
     type: "text",
     placeholder: "description",
   },
-  {
-    id: "cheapestPrice",
-    label: "Price",
-    type: "text",
-    placeholder: "100",
-  },
+  // {
+  //   id: "cheapestPrice",
+  //   label: "Price",
+  //   type: "text",
+  //   placeholder: "100",
+  // },
 ];
 
 export const roomInputs = [

@@ -28,8 +28,7 @@ const NewHotel = () => {
       setRooms(value);
   };
 
-  const handleClick = async e =>{
-    e.preventDefault()
+  const uploadImages = async (files) => {
     try{
       // Видаляємо заголовок авторизації перед виконанням запиту на Cloudinary
       delete axios.defaults.headers.common['Authorization'];
@@ -55,6 +54,34 @@ const NewHotel = () => {
     } finally {
       const token = user.token;
       axios.defaults.headers.common = {'Authorization': `bearer ${token}`};
+    }
+  }
+
+  const handleClick = async e =>{
+    e.preventDefault()
+    try{
+      let list=[]; 
+      if(!files){
+        const Hotel ={
+          ...info,
+          rooms,
+          photos:list
+        };
+        await axios.post(`/Hotel`, Hotel);
+        return;
+      }
+      
+      list = await uploadImages(files);
+
+      const Hotel ={
+        ...info,
+        rooms,
+        photos:list
+      };
+
+      await axios.post(`/Hotel`, Hotel);
+    }catch(err){
+      console.log(err)
     }
   }
 
