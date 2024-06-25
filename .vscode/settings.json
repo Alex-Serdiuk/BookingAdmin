@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/010916a9-d2a7-497b-b9c0-eca2df68086a/resourceGroups/diploma2/providers/Microsoft.Web/sites/ReactMyBookingAdmin",
+    "appService.deploySubpath": "build"
+}

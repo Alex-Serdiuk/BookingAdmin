@@ -28,7 +28,7 @@ const useApi = (endpoint) => {
   const get = useCallback(() => fetchData('GET'), [url]);
   const post = useCallback((body) => fetchData('POST', body), [url]);
   const put = useCallback((body) => fetchData('PUT', body), [url]);
-  const del = useCallback((fetchUrl) => fetchData('DELETE', null, fetchUrl), [baseUrl]);
+  const del = useCallback((fetchUrl) => fetchData('DELETE', null, fetchUrl), [url]);
 
   const cloudinaryFetch = async (fetchUrl, method, data) => {
     const token = axios.defaults.headers.common['Authorization'];
