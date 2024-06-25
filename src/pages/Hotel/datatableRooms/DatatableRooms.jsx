@@ -6,13 +6,15 @@ import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import useFetch from "../../../hooks/useFetch";
 import axios from "axios";
+import useApi from "../../../hooks/useApi";
 
 const DatatableRooms = ({columns}) => {
   const location = useLocation();
   const [list, setList] = useState();
   const path = capitalizeWord(location.pathname.split("/")[1]);
   const id = location.pathname.split("/")[3];
-  const { data, loading, error } = useFetch(`/Hotel/GetRoomsByHotelId/${id}`);
+  const { data, loading, error, get: fetchRooms } = useApi(`/Hotel/GetRoomsByHotelId/${id}`);
+  const { del: deleteRoom } = useApi();
 
   function capitalizeWord(word) {
     // Проверяем, является ли аргумент строкой
@@ -29,18 +31,27 @@ const DatatableRooms = ({columns}) => {
   }
 
   useEffect(() => {
-    setList(data);
+    fetchRooms();
+  }, [fetchRooms]);
+
+  useEffect(() => {
+    if (data) {
+      setList(data);
+    }
   }, [data]);
 
-
   const handleDelete = async (id) => {
-    try{
-      
-      await axios.delete(`/Room/${id}`);
-      setList(list => list.filter((item) => item.id !== id));
-    }catch(err){
+    try {
+      await deleteRoom(`/Room/${id}`);
+      setList(prevList => {
+        console.log("Previous list:", prevList);
+        const updatedList = prevList.filter((item) => item.id !== id);
+        console.log("Updated list:", updatedList);
+        return updatedList;
+      });
+    } catch (err) {
+      console.error("Error deleting room:", err);
     }
-  
   };
 
   const actionColumn = [
@@ -78,7 +89,7 @@ const DatatableRooms = ({columns}) => {
       </div>
       <DataGrid
         className="datagrid"
-        rows={list}
+        rows={list || []}
         columns={columns.concat(actionColumn)}
         pageSize={9}
         rowsPerPageOptions={[9]}

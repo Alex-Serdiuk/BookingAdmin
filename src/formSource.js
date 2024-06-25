@@ -41,6 +41,44 @@ export const userInputs = [
     type: "password",
   },
 ];
+export const newUserInputs = [
+  {
+    id: "userName",
+    label: "UserName",
+    type: "text",
+    placeholder: "john_doe",
+  },
+  {
+    id: "email",
+    label: "Email",
+    type: "email",
+    placeholder: "john_doe@gmail.com",
+  },
+  {
+    id: "phoneNumber",
+    label: "PhoneNumber",
+    type: "text",
+    placeholder: "+1 234 567 89",
+  },
+  
+  {
+    id: "country",
+    label: "Country",
+    type: "text",
+    placeholder: "USA",
+  },
+  {
+    id: "city",
+    label: "City",
+    type: "text",
+    placeholder: "USA",
+  },
+  {
+    id: "password",
+    label: "Password",
+    type: "password",
+  }
+];
 
 export const productInputs = [
   {

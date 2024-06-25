@@ -6,13 +6,15 @@ import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import useFetch from "../../../../hooks/useFetch";
 import axios from "axios";
+import useApi from "../../../../hooks/useApi";
 
 const DatatableUnavailableDates = ({columns}) => {
   const location = useLocation();
   const [list, setList] = useState();
   const path = capitalizeWord(location.pathname.split("/")[1]);
   const id = location.pathname.split("/")[3];
-  const { data, loading, error } = useFetch(`/RoomNumber/GetUnavailableDatesByRoomNumberId/${id}`);
+  const { data, loading, error, get: fetchUnavailableDates } = useApi(`/RoomNumber/GetUnavailableDatesByRoomNumberId/${id}`);
+  const { del: deleteUnavailableDate } = useApi();
 
   function capitalizeWord(word) {
     // Проверяем, является ли аргумент строкой
@@ -29,18 +31,21 @@ const DatatableUnavailableDates = ({columns}) => {
   }
 
   useEffect(() => {
+    fetchUnavailableDates();
+  }, [fetchUnavailableDates]);
+
+  useEffect(() => {
     setList(data);
   }, [data]);
 
 
   const handleDelete = async (id) => {
-    try{
-      
-      await axios.delete(`/UnavailableDate/${id}`);
-      setList(list => list.filter((item) => item.id !== id));
-    }catch(err){
+    try {
+      await deleteUnavailableDate(`/UnavailableDate/${id}`);
+      setList((list) => list.filter((item) => item.id !== id));
+    } catch (err) {
+      console.error("Failed to delete unavailable date:", err);
     }
-  
   };
 
   const actionColumn = [
@@ -78,7 +83,7 @@ const DatatableUnavailableDates = ({columns}) => {
       </div>
       <DataGrid
         className="datagrid"
-        rows={list}
+        rows={list || []}
         columns={columns.concat(actionColumn)}
         pageSize={9}
         rowsPerPageOptions={[9]}

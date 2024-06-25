@@ -4,49 +4,43 @@ import Navbar from "../../../components/navbar/Navbar";
 import DriveFolderUploadOutlinedIcon from "@mui/icons-material/DriveFolderUploadOutlined";
 import { useState } from "react";
 import axios from "axios";
+import useApi from "../../../hooks/useApi";
 
 const New = ({ inputs, title }) => {
   const [file, setFile] = useState("");
   const [info, setInfo] = useState({});
+  const { post: registerUser } = useApi("/Account/Register");
+  const { cloudinaryFetch } = useApi();
 
   const handleChange = e =>{
     setInfo(prev=>({...prev,[e.target.id]:e.target.value}))
   };
 
   const handleClick = async e=>{
-    e.preventDefault()
-    if (!file) {
-      // Якщо файл не вибрано, пропустити post-запит на Cloudinary
-      const newUser = {
-        ...info,
-        img: '', // Залишити img порожнім
-      };
-  
-      try {
-        await axios.post("/Account/Register", newUser);
-      } catch (err) {
-        console.log(err);
+    e.preventDefault();
+    try {
+      let img = '';
+      if (file) {
+        const data = new FormData();
+        data.append("file", file);
+        data.append("upload_preset", "upload");
+
+        const uploadRes = await cloudinaryFetch(
+          "https://api.cloudinary.com/v1_1/alex-s/image/upload",
+          'POST',
+          data
+        );
+
+        img = uploadRes.secure_url;
       }
-      return;
-    }
-    const data = new FormData()
-    data.append("file",file)
-    data.append("upload_preset","upload")
-    try{
-      const uploadRes = await axios.post(
-        "https://api.cloudinary.com/v1_1/alex-s/image/upload",
-        data
-      );
-
-      const {url} = uploadRes.data;
 
       const newUser = {
         ...info,
-        img: url,
+        img,
       };
 
-      await axios.post("/Account/Register", newUser);
-    }catch(err){
+      await registerUser(newUser);
+    } catch (err) {
       console.log(err);
     }
   }

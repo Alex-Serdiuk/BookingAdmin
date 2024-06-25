@@ -10,6 +10,7 @@ import { AuthContext } from "../../../context/AuthContext";
 // import { SHA1 } from 'crypto-js';
 import { sha1 } from "crypto-hash";
 import cloudinaryConfig from "../../../cloudinary-config";
+import useApi from "../../../hooks/useApi";
 
 const EditUser = ({ inputs, title }) => {
   const [file, setFile] = useState("");
@@ -17,7 +18,9 @@ const EditUser = ({ inputs, title }) => {
   const path = capitalizeWord(location.pathname.split("/")[1]);
   const id = location.pathname.split("/")[3];
   const { cloudName, apiKey, apiSecret } = cloudinaryConfig;
-  const { data, loading, error } = useFetch(`/${path}/${id}`);
+  const { data, loading, error, get, put } = useApi(`/${path}/${id}`);
+  // const { put: updateUser } = useApi();
+  const { cloudinaryFetch } = useApi();
   const [info, setInfo] = useState(
    {}
   );
@@ -42,6 +45,10 @@ const EditUser = ({ inputs, title }) => {
     return capitalizedWord;
   }
 
+  useEffect(() => {
+    get();
+  }, [get]);
+
   useEffect(()=>{
     if (!loading && !error && data) {
       setInfo(data); // Оновлюємо стан даними, якщо дані були успішно завантажені з сервера
@@ -58,30 +65,20 @@ const EditUser = ({ inputs, title }) => {
   };
 
   const handleDelete = async ( publicId ) => {
-    const timestamp = Date.now(); 
-    const signature = await sha1(
-      `public_id=${publicId}&timestamp=${timestamp}${apiSecret}`
-    );
+    const timestamp = Date.now();
+    const signature = await sha1(`public_id=${publicId}&timestamp=${timestamp}${apiSecret}`);
     const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/destroy`;
-    // Видаляємо заголовок авторизації перед виконанням запиту на Cloudinary
-    delete axios.defaults.headers.common['Authorization'];
-    axios
-      .post(url, {
+
+    try {
+      await cloudinaryFetch(url, 'POST', {
         public_id: publicId,
         timestamp: timestamp,
         api_key: apiKey,
         signature: signature
-      })
-      .then((response) => {
-        console.log('Изображение удалено из Cloudinary:', response);
-      })
-      
-      .catch((error) => {
-        console.error('Не удалось удалить изображение:', error);
-      }).finally(() =>{
-        const token =user.token;
-        axios.defaults.headers.common = {'Authorization': `bearer ${token}`};
       });
+    } catch (error) {
+      console.error('Failed to delete image from Cloudinary:', error);
+    }
   };
 
   const extractImageId = (url) => {
@@ -101,42 +98,29 @@ const EditUser = ({ inputs, title }) => {
   const getPublicId = (url) => url.split("/").pop().split(".")[0];
 
   const uploadImage = async (file) => {
-    try {  
-      // Видаляємо заголовок авторизації перед виконанням запиту на Cloudinary
-      delete axios.defaults.headers.common['Authorization'];
-      // Загрузить новое изображение
+    try {
       const data = new FormData();
       data.append("file", file);
       data.append("upload_preset", "upload");
-      const uploadRes = await axios.post(
-        "https://api.cloudinary.com/v1_1/alex-s/image/upload",
+  
+      const response = await cloudinaryFetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        'POST',
         data
       );
-      
-      const { url } = uploadRes.data;
-      console.log(url)
-      
-      // Вернуть URL нового изображения
-      return url;
+   console.log(response);
+      return response.url;
     } catch (error) {
       console.error("Ошибка при загрузке изображения:", error);
       throw error;
-    } finally {
-      const token = user.token;
-      axios.defaults.headers.common = {'Authorization': `bearer ${token}`};
     }
   };
 
   const replaceImage = async (file, oldUrl) => {
     try {
-      
-         const publicId = extractImageId(oldUrl);
-        // const publicId = getPublicId(oldUrl);
-        console.log(publicId)
-        await handleDelete(publicId);
-        let url = await uploadImage(file);
-        console.log(url);
-      // Вернуть URL нового изображения
+      const publicId = extractImageId(oldUrl);
+      await handleDelete(publicId);
+      const url = await uploadImage(file);
       return url;
     } catch (error) {
       console.error("Ошибка при замене изображения:", error);
@@ -146,40 +130,17 @@ const EditUser = ({ inputs, title }) => {
 
   const handleClick = async e=>{
     e.preventDefault();
-    try{
-      if (!file) {
-        // Якщо файл не вибрано, пропустити post-запит на Cloudinary
-        const user = {
-          ...info,
-          //img: '', // Залишити img порожнім
-        };
-        // console.log(user);
-        try {
-          await axios.put(`/User/${id}`, user);
-        } catch (err) {
-          console.log(err);
-        }
-        return;
+    try {
+      let url = info.img;
+      if (file) {
+        url = info.img ? await replaceImage(file, info.img) : await uploadImage(file);
       }
-      
-      let url;
-      if(info.img){
-        url = await replaceImage(file, info.img);
-        
-      }else{
-        url  = await uploadImage(file);
-      }
-      //console.log(url)
-      
-      const user = {
-        ...info,
-        img: await url
-      };
 
-      await axios.put(`/User/${id}`, user);
-     
-    }catch(err){
-      console.log(err);
+      const updatedUser = { ...info, img: url };
+      await put(updatedUser);
+      navigate(`/users/${id}`);
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -197,7 +158,7 @@ const EditUser = ({ inputs, title }) => {
               src={
                 file
                   ? URL.createObjectURL(file)
-                  : data.img ? data.img : "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg"
+                  : (data && data.img ? data.img : "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg")
               }
               alt=""
             />
@@ -223,7 +184,7 @@ const EditUser = ({ inputs, title }) => {
                     type={input.type}
                     placeholder={input.placeholder}
                     id={input.id}
-                    value={info[input.id]}
+                    value={info[input.id] || ""}
                   />
                 </div>
               ))}

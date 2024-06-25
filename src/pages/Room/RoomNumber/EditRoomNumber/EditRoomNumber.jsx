@@ -11,6 +11,7 @@ import { AuthContext } from "../../../../context/AuthContext";
 import { roomNumberColumns, unavailableDateColumns } from "../../../../datatablesource";
 import DatatableUnavailableDates from "../datatableUnavailableDates/DatatableUnavailableDates";
 import { roomNumberInputs } from "../../../../formSource";
+import useApi from "../../../../hooks/useApi";
 
 
 const EditRoomNumber = () => {
@@ -21,7 +22,8 @@ const EditRoomNumber = () => {
   const path = capitalizeWord(location.pathname.split("/")[1]);
   const id = location.pathname.split("/")[3];
   // const { data: hotelData, loading: hotelLoading, error: hotelError } = useFetch("/Hotel");
-  const { data: roomData, loading: roomLoading, error: roomError } = useFetch(`/${path}/${id}`);
+  const { data: roomData, loading: roomLoading, error: roomError, get: fetchRoom } = useApi(`/${path}/${id}`);
+  const { put: updateRoom } = useApi(); // Separate useApi call for PUT request
 
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -39,6 +41,10 @@ const EditRoomNumber = () => {
     const capitalizedWord = trimmedWord.charAt(0).toUpperCase() + trimmedWord.slice(1).toLowerCase();
     return capitalizedWord;
   }
+
+  useEffect(() => {
+    fetchRoom();
+  }, [fetchRoom]);
 
   useEffect(()=>{
     if (!roomLoading && !roomError && roomData) {
@@ -61,7 +67,7 @@ const EditRoomNumber = () => {
             ? rooms.split(",").map((room) => ({ number: room }))
             : [{ number: rooms }];
         }
-          await axios.put(`/Room/updateRoom/${id}`, {...info, roomNumbers})
+          await axios.put(`/Room/updateRoomNumber/${id}`, {...info, roomNumbers})
       }catch(err){
         console.log(err)
       }
@@ -86,7 +92,7 @@ const EditRoomNumber = () => {
                     type={input.type} 
                     placeholder={input.placeholder} 
                     onChange={handleChange}
-                    value={info[input.id]}
+                    value={info[input.id] || ""}
                   />
                 </div>
               ))}
@@ -109,7 +115,7 @@ const EditRoomNumber = () => {
                       ))}
                   </select>
                 </div> */}
-              <button onClick={handleClick}>Send</button>
+              {/* <button onClick={handleClick}>Send</button> */}
             </form>
           </div>
         </div>

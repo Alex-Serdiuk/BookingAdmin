@@ -1,42 +1,45 @@
 import "./login.scss"
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import useApi from "../../hooks/useApi";
 
 const Login = () => {
-    const [credentials, setCredentials] = useState({
-        username: undefined,
-        password: undefined,
-      });
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+  });
 
-      const { loading, error, dispatch } = useContext(AuthContext);
+  const { loading, error, dispatch } = useContext(AuthContext);
 
-      const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { post: login, data: loginData, error: loginError } = useApi("/Account/Login");
 
-      const handleChange = (e) => {
-        setCredentials((prev) => ({ ...prev, [e.target.id]: e.target.value }));
-      };
+  useEffect(() => {
+    if (loginData) {
+      dispatch({ type: "LOGIN_SUCCESS", payload: loginData.details });
+      navigate("/");
+    }
+  }, [loginData, dispatch, navigate]);
 
-      const handleClick = async (e) => {
-        e.preventDefault();
-        dispatch({ type: "LOGIN_START" });
-        try {
-          const res = await axios.post("/Account/Login", credentials);
-          
-          if(res.data.isAdmin === true){
-            dispatch({ type: "LOGIN_SUCCESS", payload: res.data.details });
-            navigate("/");
-          }else{
-            dispatch({ 
-              type: "LOGIN_FAILURE", 
-              payload: {message: "You are not allowed!"} 
-            });
-          }
-        } catch (err) {
-          dispatch({ type: "LOGIN_FAILURE", payload: err.response.data });
-        }
-      };
+  const handleChange = (e) => {
+    setCredentials((prev) => ({ ...prev, [e.target.id]: e.target.value }));
+  };
+  // console.log("API URL:", apiUrl); // Добавьте этот вывод для отладки
+  const handleClick = async (e) => {
+    e.preventDefault();
+    dispatch({ type: "LOGIN_START" });
+    try {
+      await login(credentials);
+      // dispatch({ type: "LOGIN_SUCCESS", payload: loginData.details });
+      // navigate("/")
+    } catch (err) {
+      dispatch({ type: "LOGIN_FAILURE", payload: loginError });
+    }
+  };
+
+  const isFormValid = Object.values(credentials).every((value) => value !== "");
       
   return (
     <div className="login">
@@ -56,7 +59,7 @@ const Login = () => {
           className="lInput"
         />
         <button 
-        disabled={loading} 
+        disabled={loading || !isFormValid} 
         onClick={handleClick} 
         className="lButton">
           Login

@@ -6,12 +6,14 @@ import { useEffect, useState } from "react";
 import useFetch from "../../hooks/useFetch";
 import axios from "axios";
 import { sha1 } from "crypto-hash";
+import useApi from "../../hooks/useApi";
 
 const Datatable = ({columns}) => {
   const location = useLocation();
-  const [list, setList] = useState();
+  const [list, setList] = useState([]);
   const path = capitalizeWord(location.pathname.split("/")[1]);
-  const { data, loading, error } = useFetch(`/${path}`);
+  const { data, loading, error, get } = useApi(`/${path}`);
+  const { del: deleteItem } = useApi();
 
   function capitalizeWord(word) {
     // Проверяем, является ли аргумент строкой
@@ -28,7 +30,11 @@ const Datatable = ({columns}) => {
   }
 
   useEffect(() => {
-    setList(data);
+    get();
+  }, [get]);
+
+  useEffect(() => {
+    setList(data || []);
   }, [data]);
 
 
@@ -60,7 +66,7 @@ const Datatable = ({columns}) => {
       //   //     axios.defaults.headers.common = {'Authorization': `bearer ${token}`};
       //   //   });
       // }
-      await axios.delete(`/${path}/${id}`);
+      await deleteItem(`/${path}/${id}`);
       setList(list => list.filter((item) => item.id !== id));
     }catch(err){
     }
@@ -102,7 +108,7 @@ const Datatable = ({columns}) => {
       </div>
       <DataGrid
         className="datagrid"
-        rows={list}
+        rows={list || []}
         columns={columns.concat(actionColumn)}
         pageSize={9}
         rowsPerPageOptions={[9]}

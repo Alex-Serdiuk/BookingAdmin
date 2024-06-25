@@ -9,13 +9,15 @@ import axios from "axios";
 import { sha1 } from "crypto-hash";
 import cloudinaryConfig from "../../../cloudinary-config";
 import { AuthContext } from "../../../context/AuthContext";
+import useApi from "../../../hooks/useApi";
 
 const DatatableImages = ({columns}) => {
   const location = useLocation();
   const [list, setList] = useState();
   const path = capitalizeWord(location.pathname.split("/")[1]);
   const id = location.pathname.split("/")[3];
-  const { data, loading, error } = useFetch(`/Hotel/GetHotelImagesByHotelId/${id}`);
+  const { data, loading, error, get: fetchImages } = useApi(`/Hotel/GetHotelImagesByHotelId/${id}`);
+  const { del: deleteImageFromServer, cloudinaryFetch } = useApi();
   const { cloudName, apiKey, apiSecret } = cloudinaryConfig;
   const { user } = useContext(AuthContext);
 
@@ -34,7 +36,12 @@ const DatatableImages = ({columns}) => {
   }
 
   useEffect(() => {
-    setList(data);
+    fetchImages();
+  }, [fetchImages]);
+
+
+  useEffect(() => {
+    setList(data || []);
   }, [data]);
 
   const extractImageId = (url) => {
@@ -52,39 +59,27 @@ const DatatableImages = ({columns}) => {
  };
 
   const handleDeleteImage = async ( publicId ) => {
-    const timestamp = Date.now(); 
-    const signature = await sha1(
-      `public_id=${publicId}&timestamp=${timestamp}${apiSecret}`
-    );
+    const timestamp = Date.now();
+    const signature = await sha1(`public_id=${publicId}&timestamp=${timestamp}${apiSecret}`);
     const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/destroy`;
-    // Видаляємо заголовок авторизації перед виконанням запиту на Cloudinary
-    delete axios.defaults.headers.common['Authorization'];
-    axios
-      .post(url, {
+
+    try {
+      await cloudinaryFetch(url, 'POST', {
         public_id: publicId,
         timestamp: timestamp,
         api_key: apiKey,
         signature: signature
-      })
-      .then((response) => {
-        console.log('Изображение удалено из Cloudinary:', response);
-      })
-      .catch((error) => {
-        console.error('Не удалось удалить изображение:', error);
-      }).finally(() =>{
-        const token =user.token;
-        axios.defaults.headers.common = {'Authorization': `bearer ${token}`};
       });
+    } catch (error) {
+      console.error('Failed to delete image from Cloudinary:', error);
+    }
   };
 
   const handleDelete = async (id) => {
     try{
       const image = extractImageId(data.find(item => item.id === id).url);
-      console.log(image)
       await handleDeleteImage(image);
-      const token = user.token;
-      axios.defaults.headers.common = {'Authorization': `bearer ${token}`};
-      await axios.delete(`/HotelImage/${id}`);
+      await deleteImageFromServer(`/HotelImage/${id}`);
       setList(list => list.filter((item) => item.id !== id));
     }catch(err){
     }
@@ -126,7 +121,7 @@ const DatatableImages = ({columns}) => {
       </div>
       <DataGrid
         className="datagrid"
-        rows={list}
+        rows={list || []}
         columns={columns.concat(actionColumn)}
         pageSize={9}
         rowsPerPageOptions={[9]}

@@ -14,22 +14,37 @@ import { roomColumns } from "../../../datatablesource";
 import DatatableRooms from "../datatableRooms/DatatableRooms";
 import DatatableImages from "../datatableImages/DatatableImages.jsx";
 import { hotelImageColumns } from "../../../datatablesource";
+import useApi from "../../../hooks/useApi";
 
 const EditHotel = () => {
   const [files, setFiles] = useState("");
-  const [info, setInfo] = useState({});
+  const [info, setInfo] = useState({
+    name: "",
+    title: "",
+    description: "",
+    city: "",
+    address: "",
+    distance: "",
+    cheapestPrice: "",
+    featured: false,
+  });
   const [rooms, setRooms] = useState([]);
   // const [dataRooms, setDataRooms] = useState([]);
   const location = useLocation();
   const path = capitalizeWord(location.pathname.split("/")[1]);
   const id = location.pathname.split("/")[3];
   
-  const { data: roomData, loading: roomLoading, error: roomError } = useFetch("/Room");
-  // setDataRooms(data);
-  const { data: hotelData, loading: hotelLoading, error: hotelError } = useFetch(`/${path}/${id}`);
+  const { data: roomData, loading: roomLoading, error: roomError, get: fetchRooms } = useApi("/Room");
+  const { data: hotelData, loading: hotelLoading, error: hotelError, get: fetchHotel, put: updateHotel } = useApi(`/${path}/${id}`);
+  const { cloudinaryFetch } = useApi();
 
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchRooms();
+    fetchHotel();
+  }, [fetchRooms, fetchHotel]);
 
   function capitalizeWord(word) {
     // Проверяем, является ли аргумент строкой
@@ -66,57 +81,46 @@ const EditHotel = () => {
   };
 
   const uploadImages = async (files) => {
-    try{
-      // Видаляємо заголовок авторизації перед виконанням запиту на Cloudinary
-      delete axios.defaults.headers.common['Authorization'];
+    try {
       const list = await Promise.all(
-        Object.values(files).map(async (file)=>{
+        Object.values(files).map(async (file) => {
           const data = new FormData();
-          data.append("file",file);
-          data.append("upload_preset","upload");
-          const uploadRes = await axios.post(
+          data.append("file", file);
+          data.append("upload_preset", "upload");
+          const uploadRes = await cloudinaryFetch(
             "https://api.cloudinary.com/v1_1/alex-s/image/upload",
+            "POST",
             data
           );
-    
-          const {url} = uploadRes.data;
+
+          const { url } = uploadRes;
           return url;
         })
       );
 
       return list;
-    }catch (error){
+    } catch (error) {
       console.error("Ошибка при загрузке изображения:", error);
       throw error;
-    } finally {
-      const token = user.token;
-      axios.defaults.headers.common = {'Authorization': `bearer ${token}`};
     }
   }
 
   const handleClick = async e =>{
     e.preventDefault()
     try{
-      let list=[]; 
-      if(!files){
-        const Hotel ={
-          ...info,
-          rooms,
-          photos:list
-        };
-        await axios.put(`/Hotel/${id}`, Hotel);
-        return;
+      let list = [];
+      if (files) {
+        list = await uploadImages(files);
       }
-      
-      list = await uploadImages(files);
 
-      const Hotel ={
+      const Hotel = {
         ...info,
         rooms,
-        photos:list
+        photos: list
       };
 
-      await axios.put(`/Hotel/${id}`, Hotel);
+      await updateHotel(Hotel);
+      navigate(`/hotels`);
     }catch(err){
       console.log(err)
     }
@@ -138,7 +142,7 @@ const EditHotel = () => {
               src={
                 files
                   ? URL.createObjectURL(files[0])
-                  : (hotelData.hotelImages && hotelData.hotelImages.length > 0 ? hotelData.hotelImages[0]?.url : "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg")
+                  : (hotelData && hotelData.hotelImages && hotelData.hotelImages.length > 0 ? hotelData.hotelImages[0]?.url : "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg")
                   // : "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg"
               }
               alt=""
@@ -167,7 +171,7 @@ const EditHotel = () => {
                     onChange={handleChange}
                     type={input.type}
                     placeholder={input.placeholder}
-                    value={info[input.id]} />
+                    value={info[input.id] || ''} />
                 </div>
               ))}
               <div className="formInput">
@@ -175,6 +179,7 @@ const EditHotel = () => {
                   <select 
                   id="featured"
                   onChange={handleChange}
+                  value={info.featured || false}
                   >
                     <option value={false}>No</option>
                     <option value={true}>Yes</option>

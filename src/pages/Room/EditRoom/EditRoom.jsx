@@ -11,6 +11,7 @@ import { AuthContext } from "../../../context/AuthContext";
 import DatatableRoomNumbers from "../datatableRoomNumbers/DatatableRoomNumbers";
 import { hotelImageColumns, roomNumberColumns } from "../../../datatablesource";
 import DatatableRoomImages from "../datatableImages/DatatableRoomImages";
+import useApi from "../../../hooks/useApi";
 
 
 const EditRoom = () => {
@@ -22,16 +23,22 @@ const EditRoom = () => {
   const path = capitalizeWord(location.pathname.split("/")[1]);
   const id = location.pathname.split("/")[3];
   // const { data: hotelData, loading: hotelLoading, error: hotelError } = useFetch("/Hotel");
-  const { data: roomData, loading: roomLoading, error: roomError } = useFetch(`/${path}/${id}`);
+  const { data: roomData, loading: roomLoading, error: roomError, get: fetchRoomData, put: updateRoomData } = useApi(`/${path}/${id}`);
+  const { cloudinaryFetch } = useApi();
 
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchRoomData();
+  }, [fetchRoomData]);
 
   function capitalizeWord(word) {
     // Проверяем, является ли аргумент строкой
     if (typeof word !== 'string') {
       throw new Error('Input is not a string');
     }
+    
   
     // Обрезаем последнюю букву
     const trimmedWord = word.slice(0, -1);
@@ -52,31 +59,27 @@ const EditRoom = () => {
   };
 
   const uploadImages = async (files) => {
-    try{
-      // Видаляємо заголовок авторизації перед виконанням запиту на Cloudinary
-      delete axios.defaults.headers.common['Authorization'];
+    try {
       const list = await Promise.all(
-        Object.values(files).map(async (file)=>{
+        Object.values(files).map(async (file) => {
           const data = new FormData();
-          data.append("file",file);
-          data.append("upload_preset","upload");
-          const uploadRes = await axios.post(
+          data.append("file", file);
+          data.append("upload_preset", "upload");
+          const uploadRes = await cloudinaryFetch(
             "https://api.cloudinary.com/v1_1/alex-s/image/upload",
+            "POST",
             data
           );
-    
-          const {url} = uploadRes.data;
+
+          const { url } = uploadRes;
           return url;
         })
       );
 
       return list;
-    }catch (error){
+    } catch (error) {
       console.error("Ошибка при загрузке изображения:", error);
       throw error;
-    } finally {
-      const token = user.token;
-      axios.defaults.headers.common = {'Authorization': `bearer ${token}`};
     }
   }
 
@@ -96,24 +99,17 @@ const EditRoom = () => {
         return { number: parsedNumber };
       });
     }
-        if(!files){
-          const Room ={
-            ...info,
-            roomNumbers,
-            photos:list
-          };
-          await axios.put(`/Room/updateRoom/${id}`, Room);
-          return;
-        }
-        list = await uploadImages(files);
+    if (files) {
+      list = await uploadImages(files);
+    }
 
-        const Room ={
-          ...info,
-          roomNumbers,
-          photos:list
-        };
-  
-          await axios.put(`/Room/updateRoom/${id}`, Room);
+    const Room = {
+      ...info,
+      roomNumbers,
+      photos: list
+    };
+
+    await updateRoomData(Room);
       }catch(err){
         console.log(err);
       }
@@ -133,7 +129,7 @@ const EditRoom = () => {
               src={
                 files
                   ? URL.createObjectURL(files[0])
-                  : (roomData.roomImages && roomData.roomImages.length > 0 ? roomData.roomImages[0]?.url : "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg")
+                  : (roomData && roomData.roomImages && roomData.roomImages.length > 0 ? roomData.roomImages[0]?.url : "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg")
                   // : "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg"
               }
               alt=""
@@ -162,7 +158,7 @@ const EditRoom = () => {
                     type={input.type} 
                     placeholder={input.placeholder} 
                     onChange={handleChange}
-                    value={info[input.id]}
+                    value={info[input.id] || ''}
                   />
                 </div>
               ))}
