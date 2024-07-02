@@ -97,7 +97,7 @@ export const unavailableDateColumns = [
   { field: "id", headerName: "ID", width: 200 },
   {
     field: "date",
-    headerName: "Number",
+    headerName: "Date",
     width: 230,
   }
 ];
