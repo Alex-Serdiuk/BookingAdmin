@@ -110,6 +110,8 @@ const EditRoom = () => {
     };
 
     await updateRoomData(Room);
+    // Navigate to the previous page after successful update
+    navigate(-1);
       }catch(err){
         console.log(err);
       }

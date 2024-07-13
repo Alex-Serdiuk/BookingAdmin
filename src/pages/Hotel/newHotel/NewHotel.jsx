@@ -6,6 +6,7 @@ import { useContext, useState, useEffect } from "react";
 import { hotelInputs } from "../../../formSource";
 import useApi from "../../../hooks/useApi";
 import { AuthContext } from "../../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const NewHotel = () => {
   const [files, setFiles] = useState(null);
@@ -25,6 +26,8 @@ const NewHotel = () => {
   const { data, loading, error, get: fetchRooms } = useApi("/Room");
   const { post: createHotel } = useApi("/Hotel");
   const { cloudinaryFetch } = useApi();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchRooms();
@@ -81,6 +84,7 @@ const NewHotel = () => {
 
     try {
       await createHotel(Hotel);
+      navigate(`/hotels`);
     } catch (err) {
       console.log("Error creating hotel:", err);
     }

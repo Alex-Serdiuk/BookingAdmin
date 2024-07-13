@@ -138,7 +138,7 @@ const EditUser = ({ inputs, title }) => {
 
       const updatedUser = { ...info, img: url };
       await put(updatedUser);
-      navigate(`/users/${id}`);
+      navigate(`/users`);
     } catch (err) {
       console.error(err);
     }

@@ -8,6 +8,7 @@ import useFetch from "../../../hooks/useFetch";
 import axios from "axios";
 import { AuthContext } from "../../../context/AuthContext";
 import useApi from "../../../hooks/useApi";
+import { useNavigate } from "react-router-dom";
 
 const NewRoom = () => {
   const [files, setFiles] = useState("");
@@ -15,6 +16,7 @@ const NewRoom = () => {
   const [hotelId, setHotelId] = useState(undefined);
   const [rooms, setRooms] = useState([]);
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const { data, loading, error, get: fetchHotels } = useApi("/Hotel");
   
@@ -73,6 +75,8 @@ const NewRoom = () => {
       };
 
       await createRoom(Room, `/Room/createRoom/${hotelId}`);
+      // Navigate to the previous page after successful update
+    navigate(-1);
     } catch (err) {
       console.log(err);
     }

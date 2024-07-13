@@ -32,7 +32,7 @@ export const userColumns = [
   {
     field: "phoneNumber",
     headerName: "Phone",
-    width: 100,
+    width: 125,
   }
 ];
 

@@ -5,12 +5,14 @@ import DriveFolderUploadOutlinedIcon from "@mui/icons-material/DriveFolderUpload
 import { useState } from "react";
 import axios from "axios";
 import useApi from "../../../hooks/useApi";
+import { useNavigate } from "react-router-dom";
 
 const New = ({ inputs, title }) => {
   const [file, setFile] = useState("");
   const [info, setInfo] = useState({});
   const { post: registerUser } = useApi("/Account/Register");
   const { cloudinaryFetch } = useApi();
+  const navigate = useNavigate();
 
   const handleChange = e =>{
     setInfo(prev=>({...prev,[e.target.id]:e.target.value}))
@@ -40,6 +42,7 @@ const New = ({ inputs, title }) => {
       };
 
       await registerUser(newUser);
+      navigate(-1); // Navigate to the previous page after successful update
     } catch (err) {
       console.log(err);
     }
